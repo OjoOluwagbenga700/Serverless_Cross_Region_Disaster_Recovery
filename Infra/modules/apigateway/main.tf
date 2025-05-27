@@ -5,11 +5,18 @@ locals {
   }
 }
 
-
-
 resource "aws_apigatewayv2_api" "http_api" {
   name          = "http-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins     = ["*"]
+    allow_methods     = ["GET", "POST", "OPTIONS"]
+    allow_headers     = ["*"]
+    expose_headers    = []
+    max_age           = 3600
+    allow_credentials = false
+  }
 }
 
 resource "aws_apigatewayv2_integration" "api_lambda_integrations" {
@@ -33,8 +40,24 @@ resource "aws_apigatewayv2_route" "routes" {
 
 resource "aws_apigatewayv2_stage" "api_stage" {
   api_id      = aws_apigatewayv2_api.http_api.id
-  name        = "$default"
-  auto_deploy = true
+  name        = "prod"
+  auto_deploy = true 
+}
+
+resource "aws_apigatewayv2_domain_name" "custom" {
+  domain_name = var.custom_domain_name
+
+  domain_name_configuration {
+    certificate_arn = var.certificate_arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+}
+
+resource "aws_apigatewayv2_api_mapping" "custom" {
+  api_id      = aws_apigatewayv2_api.http_api.id
+  domain_name = aws_apigatewayv2_domain_name.custom.domain_name
+  stage       = aws_apigatewayv2_stage.api_stage.name
 }
 
 resource "aws_lambda_permission" "api_gateway_permissions" {

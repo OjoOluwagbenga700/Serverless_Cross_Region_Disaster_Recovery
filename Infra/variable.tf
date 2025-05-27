@@ -14,3 +14,16 @@ variable "table_name" {
   type        = string
   default     = "HighAvailabilityTable"
 }
+variable "custom_domain_name" {
+  description = "Custom domain name for API Gateway"
+  type        = string
+  default     = "api.example.com"
+}
+
+
+variable "domain_name" {
+  description = "Custom domain name for Route 53"
+  type        = string
+  default     = "example.com"
+
+}

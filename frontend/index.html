@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>High Availability App</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <h1 class="text-center mb-4">High Availability App</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">Add Data</h2>
+            <div class="mb-3">
+                <input type="text" id="itemId" class="form-control" placeholder="Item ID">
+            </div>
+            <div class="mb-3">
+                <input type="text" id="itemData" class="form-control" placeholder="Item Data">
+            </div>
+            <button class="btn btn-primary" onclick="writeData()">Save</button>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">Data List</h2>
+            <ul id="dataList" class="list-group"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const apiUrl = 'https://api.<YOUR-DOMAIN>'; // Use Route 53 DNS name
+
+    async function writeData() {
+        const itemId = document.getElementById('itemId').value;
+        const itemData = document.getElementById('itemData').value;
+
+        const response = await fetch(`${apiUrl}/write`, {
+            method: 'POST',
+            body: JSON.stringify({ ItemId: itemId, Data: itemData }),
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        const result = await response.json();
+        alert(result.message || result.error);
+        readData();
+    }
+
+    async function readData() {
+        const response = await fetch(`${apiUrl}/read`);
+        const data = await response.json();
+        const dataList = document.getElementById('dataList');
+        dataList.innerHTML = '';
+
+        data.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.textContent = `ID: ${item.ItemId}, Data: ${item.Data}`;
+            dataList.appendChild(li);
+        });
+    }
+
+    readData(); // Load data on page load
+</script>
+</body>
+</html>
