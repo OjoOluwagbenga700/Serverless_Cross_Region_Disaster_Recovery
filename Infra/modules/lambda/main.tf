@@ -37,9 +37,3 @@ resource "aws_lambda_function" "dr_functions" {
 
 }
 
-resource "aws_lambda_function_url" "urls" {
-  for_each = aws_lambda_function.dr_functions
-
-  function_name      = each.value.function_name
-  authorization_type = "NONE"
-}
