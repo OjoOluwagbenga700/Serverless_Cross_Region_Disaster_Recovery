@@ -5,7 +5,7 @@ resource "aws_route53_zone" "hosted_zone" {
 
 resource "aws_route53_record" "custom_domain_primary" {
   zone_id = aws_route53_zone.hosted_zone.id
-  name    = var.domain_name
+  name    = var.endpoint
   type    = "A"
 
   alias {
@@ -23,7 +23,7 @@ resource "aws_route53_record" "custom_domain_primary" {
 
 resource "aws_route53_record" "custom_domain_secondary" {
   zone_id = aws_route53_zone.hosted_zone.id
-  name    = var.domain_name
+  name    = var.endpoint
   type    = "A"
 
   alias {
@@ -42,7 +42,7 @@ resource "aws_route53_record" "custom_domain_secondary" {
 
 # Health Checks (example, if you use a module or resource for these)
 resource "aws_route53_health_check" "primary" {
-  fqdn          = var.domain_name
+  fqdn          = var.endpoint
   port          = 443
   type          = "HTTPS"
   resource_path = "/read"
@@ -52,7 +52,7 @@ resource "aws_route53_health_check" "primary" {
 }
 
 resource "aws_route53_health_check" "secondary" {
-  fqdn          = var.domain_name
+  fqdn          = var.endpoint
   port          = 443
   type          = "HTTPS"
   resource_path = "/read"

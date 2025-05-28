@@ -7,23 +7,23 @@ variable "pri_region" {
 variable "sec_region" {
   description = "Secondary AWS region"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-2"
 }
 variable "table_name" {
   description = "DynamoDB table name"
   type        = string
   default     = "HighAvailabilityTable"
 }
-variable "custom_domain_name" {
-  description = "Custom domain name for API Gateway"
+variable "domain_name" {
+  description = "domain name for API Gateway"
   type        = string
-  default     = "api.example.com"
+  default     = "7hundredtechnologies.com"
 }
 
 
-variable "domain_name" {
-  description = "Custom domain name for Route 53"
+variable "endpoint" {
+  description = "domain name for Route 53"
   type        = string
-  default     = "example.com"
+  default     = "api.7hundredtechnologies.com"
 
 }

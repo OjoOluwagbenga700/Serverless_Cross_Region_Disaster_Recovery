@@ -5,3 +5,8 @@ output "domain_name_target" {
 output "domain_name_zone_id" {
   value = aws_apigatewayv2_domain_name.custom.domain_name_configuration[0].hosted_zone_id
 }
+
+output "api_custom_domain_name" {
+  value = aws_apigatewayv2_domain_name.custom.domain_name
+  
+}
