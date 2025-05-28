@@ -45,7 +45,7 @@ resource "aws_apigatewayv2_stage" "api_stage" {
 }
 
 resource "aws_apigatewayv2_domain_name" "custom" {
-  domain_name = var.custom_domain_name
+  domain_name = var.endpoint
 
   domain_name_configuration {
     certificate_arn = var.certificate_arn

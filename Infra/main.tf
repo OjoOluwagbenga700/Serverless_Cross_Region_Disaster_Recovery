@@ -39,7 +39,7 @@ module "apigateway_primary" {
   source                   = "./modules/apigateway"
   providers                = { aws = aws.primary }
   dr_functions_invoke_arns = module.lambda_primary.dr_functions_invoke_arns
-  custom_domain_name       = var.custom_domain_name
+  endpoint                 = var.endpoint
   certificate_arn          = module.acm_primary.certificate_arn
   
 }
@@ -49,7 +49,7 @@ module "apigateway_secondary" {
   source                   = "./modules/apigateway"
   providers                = { aws = aws.secondary }
   dr_functions_invoke_arns = module.lambda_secondary.dr_functions_invoke_arns
-  custom_domain_name       = var.custom_domain_name
+  endpoint                 = var.endpoint
   certificate_arn          = module.acm_secondary.certificate_arn
   
 }
@@ -57,7 +57,7 @@ module "apigateway_secondary" {
 # Primary region ACM certificate depends on Route53 hosted zone
 module "acm_primary" {
   source             = "./modules/acm"
-  custom_domain_name = var.custom_domain_name
+  domain_name        = var.domain_name
   providers          = { aws = aws.primary }
   hosted_zone_id     = module.route53.hosted_zone_id
  
@@ -66,7 +66,7 @@ module "acm_primary" {
 # Secondary region ACM certificate depends on Route53 hosted zone
 module "acm_secondary" {
   source             = "./modules/acm"
-  custom_domain_name = var.custom_domain_name
+  domain_name        = var.domain_name
   providers          = { aws = aws.secondary }
   hosted_zone_id     = module.route53.hosted_zone_id
   
@@ -76,6 +76,7 @@ module "acm_secondary" {
 module "route53" {
   source                              = "./modules/route53"
   domain_name                         = var.domain_name
+  endpoint                            = var.endpoint
   providers                           = { aws = aws.primary }
   apigw_primary_domain_name_target    = module.apigateway_primary.domain_name_target
   apigw_primary_domain_name_zone_id   = module.apigateway_primary.domain_name_zone_id

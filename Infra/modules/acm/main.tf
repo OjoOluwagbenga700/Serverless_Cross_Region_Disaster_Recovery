@@ -1,6 +1,6 @@
 resource "aws_acm_certificate" "acm_certificate" {
-  domain_name               = var.custom_domain_name
-  subject_alternative_names = ["*.${var.custom_domain_name}"]
+  domain_name               = var.domain_name
+  subject_alternative_names = ["*.${var.domain_name}"]
   validation_method         = "DNS"
 
   # Ensure new certificate is created before destroying the old one

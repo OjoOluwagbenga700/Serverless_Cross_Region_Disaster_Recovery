@@ -1,7 +1,13 @@
 variable "domain_name" {
   description = "Custom domain name for Route 53"
   type        = string
-  default     = "example.com"
+  default     = "7hundredtechnologies.com"
+  
+}
+variable "endpoint" {
+  description = "API Gateway endpoint type"
+  type        = string
+  default     = "www.7hundredtechnologies.com"
   
 }
 
