@@ -46,6 +46,7 @@ resource "aws_apigatewayv2_stage" "api_stage" {
 
 resource "aws_apigatewayv2_domain_name" "custom" {
   domain_name = var.endpoint
+  depends_on = [var.certificate_validation_arn]
 
   domain_name_configuration {
     certificate_arn = var.certificate_arn
@@ -65,7 +66,7 @@ resource "aws_lambda_permission" "api_gateway_permissions" {
 
   statement_id  = "AllowAPIGatewayInvoke-${each.value}"
   action        = "lambda:InvokeFunction"
-  function_name = var.dr_functions_invoke_arns[each.value]
+  function_name = var.dr_functions_arns[each.value]
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
 }
