@@ -11,7 +11,7 @@ module "iam" {
   source     = "./modules/iam"
   pri_region = var.pri_region
   table_name = var.table_name
-  
+
 }
 
 # Primary region Lambda functions depend on DynamoDB and IAM
@@ -21,7 +21,7 @@ module "lambda_primary" {
   lambda_role_arn = module.iam.lambda_role_arn
   providers       = { aws = aws.primary }
 
- 
+
 }
 
 # Secondary region Lambda functions depend on DynamoDB and IAM
@@ -31,7 +31,7 @@ module "lambda_secondary" {
   lambda_role_arn = module.iam.lambda_role_arn
   providers       = { aws = aws.secondary }
 
-  
+
 }
 
 # Primary API Gateway depends on Lambda functions and ACM certificate
@@ -39,9 +39,11 @@ module "apigateway_primary" {
   source                   = "./modules/apigateway"
   providers                = { aws = aws.primary }
   dr_functions_invoke_arns = module.lambda_primary.dr_functions_invoke_arns
+  dr_functions_arns        = module.lambda_primary.dr_functions_arns
+  certificate_validation_arn = module.acm_primary.certificate_validation_arn
   endpoint                 = var.endpoint
   certificate_arn          = module.acm_primary.certificate_arn
-  
+
 }
 
 # Secondary API Gateway depends on Lambda functions and ACM certificate
@@ -49,27 +51,29 @@ module "apigateway_secondary" {
   source                   = "./modules/apigateway"
   providers                = { aws = aws.secondary }
   dr_functions_invoke_arns = module.lambda_secondary.dr_functions_invoke_arns
+  dr_functions_arns        = module.lambda_secondary.dr_functions_arns
+  certificate_validation_arn = module.acm_secondary.certificate_validation_arn
   endpoint                 = var.endpoint
   certificate_arn          = module.acm_secondary.certificate_arn
-  
+
 }
 
 # Primary region ACM certificate depends on Route53 hosted zone
 module "acm_primary" {
-  source             = "./modules/acm"
-  domain_name        = var.domain_name
-  providers          = { aws = aws.primary }
-  hosted_zone_id     = module.route53.hosted_zone_id
- 
+  source         = "./modules/acm"
+  domain_name    = var.domain_name
+  providers      = { aws = aws.primary }
+  hosted_zone_id = module.route53.hosted_zone_id
+
 }
 
 # Secondary region ACM certificate depends on Route53 hosted zone
 module "acm_secondary" {
-  source             = "./modules/acm"
-  domain_name        = var.domain_name
-  providers          = { aws = aws.secondary }
-  hosted_zone_id     = module.route53.hosted_zone_id
-  
+  source         = "./modules/acm"
+  domain_name    = var.domain_name
+  providers      = { aws = aws.secondary }
+  hosted_zone_id = module.route53.hosted_zone_id
+
 }
 
 # Route53 DNS records depend on API Gateway domain names
