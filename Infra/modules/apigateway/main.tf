@@ -5,6 +5,11 @@ locals {
   }
 }
 
+resource "aws_cloudwatch_log_group" "api_logs" {
+  name = "/aws/apigateway/${var.domain_name}"
+  retention_in_days = 14
+}
+
 resource "aws_apigatewayv2_api" "http_api" {
   name          = "http-api"
   protocol_type = "HTTP"
@@ -42,6 +47,11 @@ resource "aws_apigatewayv2_stage" "api_stage" {
   api_id      = aws_apigatewayv2_api.http_api.id
   name        = "prod"
   auto_deploy = true 
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_logs.arn
+    format          = "$context.requestId $context.status $context.path"
+  }
 }
 
 resource "aws_apigatewayv2_domain_name" "custom" {
