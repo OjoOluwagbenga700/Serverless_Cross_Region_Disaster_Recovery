@@ -11,6 +11,7 @@ module "iam" {
   source     = "./modules/iam"
   pri_region = var.pri_region
   table_name = var.table_name
+  sec_region = var.sec_region
 
 }
 
@@ -36,25 +37,25 @@ module "lambda_secondary" {
 
 # Primary API Gateway depends on Lambda functions and ACM certificate
 module "apigateway_primary" {
-  source                   = "./modules/apigateway"
-  providers                = { aws = aws.primary }
-  dr_functions_invoke_arns = module.lambda_primary.dr_functions_invoke_arns
-  dr_functions_arns        = module.lambda_primary.dr_functions_arns
+  source                     = "./modules/apigateway"
+  providers                  = { aws = aws.primary }
+  dr_functions_invoke_arns   = module.lambda_primary.dr_functions_invoke_arns
+  dr_functions_arns          = module.lambda_primary.dr_functions_arns
   certificate_validation_arn = module.acm_primary.certificate_validation_arn
-  endpoint                 = var.endpoint
-  certificate_arn          = module.acm_primary.certificate_arn
+  domain_name                = var.domain_name
+  certificate_arn            = module.acm_primary.certificate_arn
 
 }
 
 # Secondary API Gateway depends on Lambda functions and ACM certificate
 module "apigateway_secondary" {
-  source                   = "./modules/apigateway"
-  providers                = { aws = aws.secondary }
-  dr_functions_invoke_arns = module.lambda_secondary.dr_functions_invoke_arns
-  dr_functions_arns        = module.lambda_secondary.dr_functions_arns
+  source                     = "./modules/apigateway"
+  providers                  = { aws = aws.secondary }
+  dr_functions_invoke_arns   = module.lambda_secondary.dr_functions_invoke_arns
+  dr_functions_arns          = module.lambda_secondary.dr_functions_arns
   certificate_validation_arn = module.acm_secondary.certificate_validation_arn
-  endpoint                 = var.endpoint
-  certificate_arn          = module.acm_secondary.certificate_arn
+  domain_name                = var.domain_name
+  certificate_arn            = module.acm_secondary.certificate_arn
 
 }
 
@@ -80,7 +81,6 @@ module "acm_secondary" {
 module "route53" {
   source                              = "./modules/route53"
   domain_name                         = var.domain_name
-  endpoint                            = var.endpoint
   providers                           = { aws = aws.primary }
   apigw_primary_domain_name_target    = module.apigateway_primary.domain_name_target
   apigw_primary_domain_name_zone_id   = module.apigateway_primary.domain_name_zone_id

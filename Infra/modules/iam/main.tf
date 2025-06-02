@@ -33,7 +33,8 @@ resource "aws_iam_policy" "lambda_custom_policy" {
         "dynamodb:Scan" 
       ],
       Resource = [
-     "arn:aws:dynamodb:${var.pri_region}:${data.aws_caller_identity.current.account_id}:table/${var.table_name}"
+     "arn:aws:dynamodb:${var.pri_region}:${data.aws_caller_identity.current.account_id}:table/${var.table_name}",
+     "arn:aws:dynamodb:${var.sec_region}:${data.aws_caller_identity.current.account_id}:table/${var.table_name}"
       ]
     },
     

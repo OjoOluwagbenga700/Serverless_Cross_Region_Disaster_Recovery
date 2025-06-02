@@ -45,9 +45,24 @@ resource "aws_apigatewayv2_stage" "api_stage" {
 }
 
 resource "aws_apigatewayv2_domain_name" "custom" {
-  domain_name = var.endpoint
+  domain_name = "api.${var.domain_name}"
   depends_on = [var.certificate_validation_arn]
-
+  domain_name_configuration {
+    certificate_arn = var.certificate_arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+}
+resource "aws_apigatewayv2_domain_name" "primary" {
+  domain_name = "primary-api.${var.domain_name}"
+  domain_name_configuration {
+    certificate_arn = var.certificate_arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+}
+resource "aws_apigatewayv2_domain_name" "secondary" {
+  domain_name = "secondary-api.${var.domain_name}"
   domain_name_configuration {
     certificate_arn = var.certificate_arn
     endpoint_type   = "REGIONAL"
@@ -60,6 +75,19 @@ resource "aws_apigatewayv2_api_mapping" "custom" {
   domain_name = aws_apigatewayv2_domain_name.custom.domain_name
   stage       = aws_apigatewayv2_stage.api_stage.name
 }
+
+resource "aws_apigatewayv2_api_mapping" "primary" {
+  api_id      = aws_apigatewayv2_api.http_api.id
+  domain_name = aws_apigatewayv2_domain_name.primary.domain_name
+  stage       = aws_apigatewayv2_stage.api_stage.name
+}
+
+resource "aws_apigatewayv2_api_mapping" "secondary" {
+  api_id      = aws_apigatewayv2_api.http_api.id
+  domain_name = aws_apigatewayv2_domain_name.secondary.domain_name
+  stage       = aws_apigatewayv2_stage.api_stage.name
+}
+
 
 resource "aws_lambda_permission" "api_gateway_permissions" {
   for_each = local.api_routes

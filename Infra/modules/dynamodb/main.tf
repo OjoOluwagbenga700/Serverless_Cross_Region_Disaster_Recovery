@@ -13,6 +13,7 @@ resource "aws_dynamodb_table" "primary" {
   name     = var.table_name
   hash_key = "ItemId"
   billing_mode = "PAY_PER_REQUEST"
+  stream_enabled = true
 
   attribute {
     name = "ItemId"
