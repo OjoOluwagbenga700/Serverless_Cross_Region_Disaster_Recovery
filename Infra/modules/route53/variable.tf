@@ -4,12 +4,6 @@ variable "domain_name" {
   default     = "7hundredtechnologies.com"
   
 }
-variable "endpoint" {
-  description = "API Gateway endpoint type"
-  type        = string
-  default     = "www.7hundredtechnologies.com"
-  
-}
 
 variable "apigw_primary_domain_name_target" {
   description = "API Gateway primary domain name target"

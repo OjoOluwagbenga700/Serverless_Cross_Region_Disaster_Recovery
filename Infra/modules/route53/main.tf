@@ -3,15 +3,15 @@ resource "aws_route53_zone" "hosted_zone" {
   name = var.domain_name
 }
 
-resource "aws_route53_record" "custom_domain_primary" {
+resource "aws_route53_record" "primary_api" {
   zone_id = aws_route53_zone.hosted_zone.id
-  name    = var.endpoint
+  name    = "primary-api.${var.domain_name}"
   type    = "A"
 
   alias {
     name                   = var.apigw_primary_domain_name_target
     zone_id                = var.apigw_primary_domain_name_zone_id
-    evaluate_target_health = false
+    evaluate_target_health = true
   }
 
   set_identifier = "primary"
@@ -21,15 +21,15 @@ resource "aws_route53_record" "custom_domain_primary" {
   health_check_id = aws_route53_health_check.primary.id
 }
 
-resource "aws_route53_record" "custom_domain_secondary" {
+resource "aws_route53_record" "secondary_api" {
   zone_id = aws_route53_zone.hosted_zone.id
-  name    = var.endpoint
+  name    = "secondary-api.${var.domain_name}"
   type    = "A"
 
   alias {
     name                   = var.apigw_secondary_domain_name_target
     zone_id                = var.apigw_secondary_domain_name_zone_id
-    evaluate_target_health = false
+    evaluate_target_health = true
   }
 
   set_identifier = "secondary"
@@ -42,7 +42,7 @@ resource "aws_route53_record" "custom_domain_secondary" {
 
 # Health Checks (example, if you use a module or resource for these)
 resource "aws_route53_health_check" "primary" {
-  fqdn          = var.endpoint
+  fqdn          = "primary-api.${var.domain_name}"
   port          = 443
   type          = "HTTPS"
   resource_path = "/read"
@@ -52,11 +52,45 @@ resource "aws_route53_health_check" "primary" {
 }
 
 resource "aws_route53_health_check" "secondary" {
-  fqdn          = var.endpoint
+  fqdn          = "secondary-api.${var.domain_name}"
   port          = 443
   type          = "HTTPS"
   resource_path = "/read"
   failure_threshold = 3
   request_interval  = 30
   tags = { Name = "Secondary" }
+}
+
+
+# Main failover record for clients
+resource "aws_route53_record" "api" {
+  zone_id = aws_route53_zone.hosted_zone.id
+  name    = "api.${var.domain_name}"
+  type    = "A"
+
+  set_identifier = "api-failover"
+  failover_routing_policy {
+    type = "PRIMARY"
+  }
+  alias {
+    name                   = aws_route53_record.primary_api.fqdn
+    zone_id                = aws_route53_zone.hosted_zone.id
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "api_secondary" {
+  zone_id = aws_route53_zone.hosted_zone.id
+  name    = "api.${var.domain_name}"
+  type    = "A"
+
+  set_identifier = "api-failover-secondary"
+  failover_routing_policy {
+    type = "SECONDARY"
+  }
+  alias {
+    name                   = aws_route53_record.secondary_api.fqdn
+    zone_id                = aws_route53_zone.hosted_zone.id
+    evaluate_target_health = true
+  }
 }

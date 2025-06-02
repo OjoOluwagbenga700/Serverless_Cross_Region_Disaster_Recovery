@@ -21,9 +21,3 @@ variable "domain_name" {
 }
 
 
-variable "endpoint" {
-  description = "domain name for Route 53"
-  type        = string
-  default     = "api.7hundredtechnologies.com"
-
-}
